@@ -11,12 +11,17 @@ if ("files".indexOf(window.location.href.replace(/\//g, '') > -1))
 	//console.log(download_link)
 	//window.open(download_link, "_blank")
 	//window.location = download_link;
-	var response = {};
-	response.type = "file";
-	response.title = file_url
-	response.link = download_link
-	//console.log(response)
-	chrome.runtime.sendMessage(response);
+	var msg = {};
+	msg.sender = "content";
+	msg.receiver = "background";
+	msg.type = "file";
+	msg.title = file_url
+	msg.link = download_link
+	//console.log(msg)
+	//chrome.runtime.sendMessage(msg);
+	chrome.runtime.sendMessage(msg, function(response) {
+	  console.log(response.hello.concat(" heard me."));
+	});
 }
 else{
 	//This is not course page

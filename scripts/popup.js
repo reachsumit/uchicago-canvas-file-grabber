@@ -2,21 +2,23 @@ var info;
 
 function changeText() {
 document.getElementById('pText').innerHTML = "World is changing!";
-console.log("sending request")
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  chrome.tabs.sendMessage(tabs[0].id, {method: "get"}, function(response) {
-    console.log(response);
-  });
-});
+console.log("sending request to background")
+var msg = {};
+msg.sender = "popup";
+msg.receiver = "background";
+msg.type = "test";
+
+	chrome.runtime.sendMessage(msg, function(response) {
+	  console.log(response.hello.concat(" heard me."));
+	  console.log(response.data);
+	});
+
+//chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+//  chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
+//	console.log("events received at popup from background with payload:");
+//    console.log(response.hello);
+//  });
+//});
 }
 
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    console.log(sender.tab ?
-                "from a content script:" + sender.tab.url :
-                "from the extension");
-	
-	info = request.title;
-  });
-
-document.getElementById('d1').innerHTML = info;
+document.getElementById('b1').onclick = changeText;
