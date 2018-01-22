@@ -22,5 +22,9 @@
     ],
     "js": ["scripts/content_ilykei.js"]
   }
-]
+],
+  
+  "permissions": [
+    "activeTab"
+  ]
 }

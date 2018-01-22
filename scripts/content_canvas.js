@@ -10,7 +10,13 @@ if ("files".indexOf(window.location.href.replace(/\//g, '') > -1))
 	var download_link = window.location.protocol.concat("//",window.location.hostname,"/",file)
 	//console.log(download_link)
 	//window.open(download_link, "_blank")
-	window.location = download_link
+	//window.location = download_link;
+	var response = {};
+	response.type = "file";
+	response.title = file_url
+	response.link = download_link
+	//console.log(response)
+	chrome.runtime.sendMessage(response);
 }
 else{
 	//This is not course page
@@ -38,3 +44,12 @@ else{
 	//console.log(topic_urls.length)
 
 }
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+	console.log("Whoa!");
+    console.log(sender.tab ?
+                "from a content script:" + sender.tab.url :
+                "from the extension");
+	console.log(request)
+  });
