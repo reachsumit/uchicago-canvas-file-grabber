@@ -14,7 +14,7 @@
     "matches": [
 		"*://canvas.uchicago.edu/*"
     ],
-    "js": ["scripts/content_canvas.js"]
+    "js": ["scripts/jquery-3.3.1.min.js","scripts/content_canvas.js"]
   },
   {
     "matches": [
