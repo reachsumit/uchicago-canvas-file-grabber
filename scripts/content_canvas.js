@@ -1,6 +1,6 @@
 console.log("This is canvas!");
 
-if ("files".indexOf(window.location.href.replace(/\//g, '') > -1))
+if ("files".indexOf(window.location.href.replace(/\//g, '')) > -1)
 {
 	// This is a files page
 	var file = $("div#content div span a").attr("href");
@@ -26,28 +26,44 @@ if ("files".indexOf(window.location.href.replace(/\//g, '') > -1))
 else{
 	//This is not course page
 	// below code fetches all the list of modules and their urls
-	var modules = [];
-	var module_urls = [];
+
+	download = {}
 	$("div.item-group-condensed").each(function(){
-			modules.push($(this).attr("aria-label"));
-			module_urls.push($(this).attr("data-module-url"));
+			modules_name = $(this).attr("aria-label");
+			module_url = $(this).attr("data-module-url");
+			module_id = $(this).attr("id");
+			download[modules_name] = {};
+			download[modules_name].module = modules_name;
+			download[modules_name].module_url = module_url;
+			download[modules_name].topics = []
+			
+			var link_next;
+			jQuery.ajaxSetup({async:false});
+			$("div".concat("#",module_id)).find("div.content ul.ig-list li div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
+				$.get($(this).attr("href"), function(response) {
+				  console.log( {title:$(response).find("div#content div span a").attr("href"),link:$(response).find("div#content div span a").html().trim()});
+				});
+				download[modules_name].topics.push({title:$(this).text().trim(),link:$(this).attr("href"),link_next:link_next});
+			});
+			jQuery.ajaxSetup({async:true});
 	 });
-	//console.log(modules.join('\r\n'));
-	//console.log(module_urls.join('\r\n'));
-
-	var topics = [];
-	var topic_urls = [];
-	//var test=$("div.item-group-condensed div.content ul.ig-list li div.ig-row a").attr("href");
-	//console.log(test);
-	$("div.item-group-condensed div.content ul.ig-list li div.ig-row a").each(function(){
-			topics.push($(this).attr("aria-label"));
-			topic_urls.push($(this).attr("href"));
-	 });
-	//console.log(topics.join('\r\n'));
-	//console.log(topic_urls.join('\r\n'));
-	//console.log(topics.length)
-	//console.log(topic_urls.length)
-
+	 console.log(download);
+	
+	
+	/*jQuery.ajaxSetup({async:false});
+	for(i=0;i<4;i++){
+		$.get(topic_urls[i], function(response) {
+		  download.push({title:$(response).find("div#content div span a").attr("href"),link:$(response).find("div#content div span a").html().trim()});
+		});
+	}
+	jQuery.ajaxSetup({async:true});
+	*/
+	
+	//var msg = {};
+	//msg.sender = "content";
+	//msg.receiver = "background";
+	//msg.type = "batch";
+	//msg.download = download;
 }
 
 chrome.runtime.onMessage.addListener(
