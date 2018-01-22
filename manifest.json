@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "UC Grabber",
+  "version": "0.1",
+  
+  "permissions": [
+    "activeTab"
+  ],
+  
+  "browser_action": {
+    "default_icon": "images/icon.png",
+    "default_popup": "html/popup.html",
+	 "default_title": "Grabber for uChicago Canvas!"
+  }
+}
