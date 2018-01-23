@@ -1,10 +1,14 @@
 <html>
 <head>
   <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
 </head>
-<body>
-<p id="pText">Hello world!</p>
-<input type="button" value="Button 1" id="b1" class='downloadButton'/>
+<body style="height:252;min-width:310px;font-family: 'Roboto Slab', serif;">
+<p id="pText" align="center" style="font-size: 18px;"></p>
+<input type="button" value="Process" id="startProcess" class='downloadButton' style="margin-left:100px;"/>
+<img src='../images/man.gif' id='waiting' style="display:none;height:232;width=232;">
+<img src='../images/ez.gif' id='notSupported' style="display:none;height:232;width=232;">
+<script src='../scripts/jquery-3.3.1.min.js'></script>
 <script src='../scripts/popup.js'></script>
 </body>
 </html>

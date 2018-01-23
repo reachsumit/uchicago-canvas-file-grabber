@@ -23,6 +23,9 @@
     "js": ["scripts/content_ilykei.js"]
   }
 ],
+  "permissions": [
+    "tabs"
+   ],
   
   "background": {
     "scripts": ["scripts/events.js"]

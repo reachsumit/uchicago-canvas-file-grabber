@@ -1,27 +1,52 @@
-var currTab;
-function changeText() {
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  var currentTab = tabs[0]; // there will be only one in this array
-  console.log(currentTab.id); // also has properties like currentTab.id
-});
-document.getElementById('pText').innerHTML = "World is changing!";
-console.log("sending request to background")
-var msg = {};
-msg.sender = "popup";
-msg.receiver = "background";
-msg.type = "test";
+var currentTab;
+function startProcess() {
+	make_popup_busy();
+	return;
+	console.log("sending request to background")
+	var msg = {};
+	msg.sender = "popup";
+	msg.receiver = "background";
+	msg.type = "test";
 
-	chrome.runtime.sendMessage(msg, function(response) {
-	  console.log(response.hello.concat(" heard me."));
-	  console.log(response.data);
-	});
+		chrome.runtime.sendMessage(msg, function(response) {
+		  console.log(response.hello.concat(" heard me."));
+		  console.log(response.data);
+		});
 
-//chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-//  chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
-//	console.log("events received at popup from background with payload:");
-//    console.log(response.hello);
-//  });
-//});
+	//chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+	//  chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
+	//	console.log("events received at popup from background with payload:");
+	//    console.log(response.hello);
+	//  });
+	//});
 }
 
-document.getElementById('b1').onclick = changeText;
+document.getElementById('startProcess').onclick = startProcess;
+
+$(document).ready(function(){
+	$("#waiting").hide();
+	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+	  currentTab = tabs[0]; // there will be only one in this array
+	  tab_id = currentTab.id;	  // also has properties like currentTab.id
+	  tab_url = currentTab.url;
+	  indicate_start(tab_id,tab_url);
+	});
+});
+
+function indicate_start(tab_id,tab_url){
+	console.log(tab_id,tab_url);
+	if ((tab_url.search(/canvas.uchicago.edu/) != -1)&&((tab_url.search(/modules/) != -1) || (tab_url.search(/files/)!=-1))){
+		document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+	}
+	else{
+		document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
+		$("#startProcess").hide();
+		$("#notSupported").show();
+	}
+}
+
+function make_popup_busy(){
+	$("#startProcess").hide();
+	$("#waiting").show();
+	$("#pText").text("Please wait! This might take a few seconds.");
+}
