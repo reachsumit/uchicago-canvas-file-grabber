@@ -8,8 +8,12 @@ chrome.runtime.onMessage.addListener(
 			data[sender.tab.id] = {};
 			data[sender.tab.id].tab = sender.tab.id;
 			data[sender.tab.id].type = request.type;
-			data[sender.tab.id].download = []
-			data[sender.tab.id].download.push({title:request.title,link:request.link});
+			data[sender.tab.id].download = [];
+			if(request.type=="file"){
+				data[sender.tab.id].download.push({title:request.title,link:request.link});
+			}else{
+				data[sender.tab.id].download = request.download;
+			}
 			sendResponse({hello: "background events"});
 		}
 		else if(request.sender == "popup"){
