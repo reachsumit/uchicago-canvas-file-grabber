@@ -26,9 +26,5 @@
   
   "background": {
     "scripts": ["scripts/events.js"]
-  },
-  
-  "permissions": [
-    "activeTab"
-  ]
+  }
 }

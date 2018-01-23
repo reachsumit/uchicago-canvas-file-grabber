@@ -1,6 +1,9 @@
-var info;
-
+var currTab;
 function changeText() {
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+  var currentTab = tabs[0]; // there will be only one in this array
+  console.log(currentTab.id); // also has properties like currentTab.id
+});
 document.getElementById('pText').innerHTML = "World is changing!";
 console.log("sending request to background")
 var msg = {};

@@ -1,5 +1,5 @@
 console.log("This is canvas!");
-console.log("files".indexOf(window.location.href.replace(/\//g, '')));
+
 if (window.location.href.search(/files/) != -1)
 {
 	// This is a files page
@@ -19,7 +19,7 @@ if (window.location.href.search(/files/) != -1)
 	  console.log(response.hello.concat(" heard me."));
 	});
 }
-else{
+else if (window.location.href.search(/modules/) != -1){
 	//This is not course page
 	// below code fetches all the list of modules and their urls
 
