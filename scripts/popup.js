@@ -1,18 +1,19 @@
 var currentTab;
 function startProcess() {
 	make_popup_busy();
-	return;
 	console.log("sending request to background")
 	var msg = {};
 	msg.sender = "popup";
 	msg.receiver = "background";
-	msg.type = "test";
+	msg.action = "scrape";
+	msg.tab = currentTab;
 
-		chrome.runtime.sendMessage(msg, function(response) {
-		  console.log(response.hello.concat(" heard me."));
-		  console.log(response.data);
-		});
-
+	chrome.runtime.sendMessage(msg, function(response) {
+	  console.log(response);
+	  //console.log(response.hello.concat(" heard me."));
+	  //console.log(response.data);
+	  //make_popup_free();
+	});
 	//chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 	//  chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
 	//	console.log("events received at popup from background with payload:");
@@ -50,3 +51,18 @@ function make_popup_busy(){
 	$("#waiting").show();
 	$("#pText").text("Please wait! This might take a few seconds.");
 }
+
+function make_popup_free(){
+	$("#waiting").hide();
+	$("#pText").text("Your downloads are ready! :)");
+}
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+	  if(request.receiver!="background"){
+		console.log(request)
+		console.log(request.data[currentTab.id])
+		make_popup_free();
+		//$('body').append('<div>Download link</div>');
+	  }
+});
