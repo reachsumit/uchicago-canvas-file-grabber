@@ -17,7 +17,11 @@ function(request, sender, sendResponse) {
 						}
 						else if(request.type=="download_main"){
 							newArr = request.download[i].link.split("%2F");
-							chrome.downloads.download({url: request.download[i].link,filename:newArr[newArr.length-1]});
+							if(request.folder.length>3){
+								chrome.downloads.download({url: request.download[i].link,filename:request.folder.concat("/",newArr[newArr.length-1])});
+							}else{
+								chrome.downloads.download({url: request.download[i].link,filename:newArr[newArr.length-1]});
+							}
 						}
 					}
 				}

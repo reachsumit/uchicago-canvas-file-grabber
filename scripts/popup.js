@@ -2,6 +2,7 @@ var currentTab;
 var global_button_links;
 var webpage;
 var singleLink;
+var modules;
 
 function startProcess() {
 	make_popup_busy();
@@ -74,13 +75,16 @@ function make_popup_free(){
 	$("#startProcess").hide();
 }
 function request_download(down_id){
-	var dlinks = []
+	var dlinks = [];
+	var dnames = [];
 	for(i=0;i<global_button_links[down_id].length;i++){
 		dlinks.push(global_button_links[down_id][i].link_next.download_link);
+		dnames.push(global_button_links[down_id][i].link_next.download_filename);
 	}
+	folder=modules[down_id].replace(/[^a-z0-9.(),';{}+&^%\[\]$#@!~`+-]/gi, '_');
 	for(i=0;i<dlinks.length;i++){
 		actual_link = 'https://canvas.uchicago.edu'.concat(dlinks[i]);
-		chrome.downloads.download({url: actual_link});
+		chrome.downloads.download({url: actual_link,filename:folder.concat("/",dnames[i])});
 	}
 }
 
@@ -109,6 +113,7 @@ chrome.runtime.onMessage.addListener(
 							button_links.push(val.topics);
 					}
 				});
+				modules = button_titles;
 				global_button_links = button_links;
 				for(i=0;i<button_titles.length;i++){
 					$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');

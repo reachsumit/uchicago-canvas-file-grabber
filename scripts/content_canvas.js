@@ -26,12 +26,14 @@ function scrapeThePage(){
 				modules_name = $(this).attr("aria-label");
 				module_url = $(this).attr("data-module-url");
 				module_id = $(this).attr("id");
+				//Find module
 				if($("div".concat("#",module_id)).find("div.ig-header div.ig-header-admin div.completion_status i.icon-lock").attr("title")=="Locked"){
 					download[modules_name] = {};
 					download[modules_name].module = modules_name;
 					download[modules_name].module_url = module_url;
 					download[modules_name].topics = []
 
+					// For each module take out the file details
 					var link_next;
 					jQuery.ajaxSetup({async:false});
 					$("div".concat("#",module_id)).find("div.content ul.ig-list li").each(function(){
@@ -39,7 +41,7 @@ function scrapeThePage(){
 						if($(this).attr("class").search(/external_url/)==-1 && $(this).attr("class").search(/assignment/)==-1){
 							$("li".concat("#",li_id)).find("div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
 								$.get($(this).attr("href"), function(response) {
-								  link_next = {download_link:$(response).find("div#content div span a").attr("href"),download_title:$(response).find("div#content div span a").html().trim()};
+								  link_next = {download_link:$(response).find("div#content div span a").attr("href"),download_title:$(response).find("div#content div span a").html().trim(),download_filename:$(response).find("h2").text()};
 								});
 							download[modules_name].topics.push({title:$(this).text().trim(),link:$(this).attr("href"),link_next:link_next});
 							});

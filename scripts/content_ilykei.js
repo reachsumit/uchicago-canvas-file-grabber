@@ -2,6 +2,7 @@ console.log("This is ilykei!");
 var injected = false;
 var download_side = [];
 var download_main = [];
+var directoryName = "";
 
 function download_all(){
 	console.log("Going to download all!!!!");
@@ -11,6 +12,7 @@ function download_all(){
 	msg.destination = "background";
 	msg.type = "download_main";
 	msg.download = download_main;
+	msg.folder = directoryName;
 	chrome.runtime.sendMessage(msg, function(response) {
 	  console.log(response.received_by.concat(" heard me."));
 	});
@@ -24,6 +26,7 @@ function download_single(){
 	msg.destination = "background";
 	msg.type = "download_side";
 	msg.download = download_side;
+	msg.folder = directoryName;
 	chrome.runtime.sendMessage(msg, function(response) {
 	  console.log(response.received_by.concat(" heard me."));
 	});
@@ -54,15 +57,16 @@ function scrapeThePage(){
 		}
 		
 		$("ul.list-group a").each(function(){
-			download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.()]/gi, '_')});
+			download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.(),';{}+&^%\[\]$#@!~`+-]/gi, '_')});
 		});
 		$("div#lectureDoc").find("a").each(function(){
 			link = $(this).attr("href");
-			title = $(this).text().replace(/[^a-z0-9.()]/gi, '_');
+			title = $(this).text().replace(/[^a-z0-9.(),';{}+&^%\[\]$#@!~`+-]/gi, '_');
 			if(link.search(/fileProxy/) != -1){
 				download_main.push({link:link,name:title});
 			}
 		});
+		directoryName = $("h1.title p").text().replace(/(\r\n|\n|\r)/gm,"_");
 		var msg = {};
 		msg.sender = "content_ilykei";
 		msg.receiver = "background"; // we don't want content to directly pick it up as events has to do certain adjustments to this data
