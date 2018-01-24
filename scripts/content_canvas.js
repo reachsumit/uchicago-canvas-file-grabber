@@ -38,7 +38,7 @@ function scrapeThePage(){
 					jQuery.ajaxSetup({async:false});
 					$("div".concat("#",module_id)).find("div.content ul.ig-list li").each(function(){
 						li_id = $(this).attr("id");
-						if($(this).attr("class").search(/external_url/)==-1 && $(this).attr("class").search(/assignment/)==-1){
+						if($(this).attr("class").search(/attachment/)!=-1){
 							$("li".concat("#",li_id)).find("div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
 								$.get($(this).attr("href"), function(response) {
 								  link_next = {download_link:$(response).find("div#content div span a").attr("href"),download_title:$(response).find("div#content div span a").html().trim(),download_filename:$(response).find("h2").text()};
@@ -46,6 +46,19 @@ function scrapeThePage(){
 							download[modules_name].topics.push({title:$(this).text().trim(),link:$(this).attr("href"),link_next:link_next});
 							});
 						}
+						// TODO: Add support for scraping assignments module
+						/*
+						else if($(this).attr("class").search(/assignment/)!=-1){
+							$("li".concat("#",li_id)).find("div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
+								$.get($(this).attr("href"), function(response) {
+									$(response).find("div.description").find("a").each(function(){
+										link_next = {download_link:$(this).attr("href"),download_title:$(this).attr("title"),download_filename:$(this).text()};
+								  });
+								});
+							download[modules_name].topics.push({title:$(this).text().trim(),link:$(this).attr("href"),link_next:link_next});
+							});
+						}
+						*/
 					});
 					jQuery.ajaxSetup({async:true});
 				}
