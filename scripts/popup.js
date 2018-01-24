@@ -4,6 +4,9 @@ var webpage;
 var singleLink;
 var modules;
 
+// TODO: Protect against load/reload
+//https://stackoverflow.com/questions/23895377/sending-message-from-a-background-script-to-a-content-script-then-to-a-injected/23895822#23895822
+
 function startProcess() {
 	make_popup_busy();
 	console.log("sending request to background")
@@ -66,7 +69,8 @@ function indicate_start(tab_id,tab_url){
 function make_popup_busy(){
 	$("#startProcess").hide();
 	$("#waiting").show();
-	$("#pText").text("Please wait! This might take a few seconds.");
+	$("#pText").text("Please wait! This might take upto a minute.");
+	$("#p2Text").text("(Do not close this popup window!)");
 }
 
 function make_popup_free(){
