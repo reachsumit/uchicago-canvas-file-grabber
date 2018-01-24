@@ -24,7 +24,7 @@
   }
 ],
   "permissions": [
-    "tabs"
+    "tabs","downloads"
    ],
   
   "background": {

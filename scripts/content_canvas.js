@@ -4,26 +4,23 @@ function scrapeThePage(){
 	if (window.location.href.search(/files/) != -1)
 	{
 		// This is a files page
-		var file = $("div#content div span a").attr("href");
-		var file_url = $("div#content div span a").html();
-		var download_link = window.location.protocol.concat("//",window.location.hostname,"/",file)
-		//console.log(download_link)
-		//window.open(download_link, "_blank")
-		//window.location = download_link;
+		var file_url = $("div#content div span a").attr("href");
+		var file = $("div#content div span a").html();
+		var download_link = window.location.protocol.concat("//",window.location.hostname,"/",file_url)
+		
 		var msg = {};
-		msg.sender = "content";
-		msg.receiver = "background";
+		msg.sender = "content_canvas";
+		msg.receiver = "background"; // we don't want content to directly pick it up as events has to do certain adjustments to this data
+		msg.destination = "popup";
 		msg.type = "file";
-		msg.title = file_url
+		msg.title = file;
 		msg.link = download_link
 		chrome.runtime.sendMessage(msg, function(response) {
-		  console.log(response.hello.concat(" heard me."));
+		  console.log(response.received_by.concat(" heard me."));
 		});
 	}
 	else if (window.location.href.search(/modules/) != -1){
-		//This is not course page
-		// below code fetches all the list of modules and their urls
-
+		//This is not modules page
 		download = {}
 		$("div.item-group-condensed").each(function(){
 				modules_name = $(this).attr("aria-label");
@@ -41,8 +38,6 @@ function scrapeThePage(){
 						li_id = $(this).attr("id");
 						if($(this).attr("class").search(/external_url/)==-1 && $(this).attr("class").search(/assignment/)==-1){
 							$("li".concat("#",li_id)).find("div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
-								//console.log(module_id);
-								//console.log($(this).attr("href"));
 								$.get($(this).attr("href"), function(response) {
 								  link_next = {download_link:$(response).find("div#content div span a").attr("href"),download_title:$(response).find("div#content div span a").html().trim()};
 								});
@@ -56,21 +51,25 @@ function scrapeThePage(){
 		 //console.log(download);
 		
 		var msg = {};
-		msg.sender = "content";
-		msg.receiver = "background";
+		msg.sender = "content_canvas";
+		msg.receiver = "background"; // we don't want content to directly pick it up as events has to do certain adjustments to this data
+		msg.destination = "popup";
 		msg.type = "batch";
 		msg.download = download;
 		
 		chrome.runtime.sendMessage(msg, function(response) {
-		  console.log(response.hello.concat(" heard me."));
+		  console.log(response.received_by.concat(" heard me."));
 		});
 	}
 }
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-	console.log(request)
-	if(request.action=="scrape"){
-		scrapeThePage();
+	console.log(request);
+	if(request.data.destination=="content_canvas"){
+		if(request.action=="scrape"){
+			scrapeThePage();
+		}
 	}
-  });
+  }
+);

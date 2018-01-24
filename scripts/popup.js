@@ -1,35 +1,27 @@
 var currentTab;
 var global_button_links;
+var webpage;
+var singleLink;
+
 function startProcess() {
 	make_popup_busy();
 	console.log("sending request to background")
 	var msg = {};
 	msg.sender = "popup";
 	msg.receiver = "background";
+	msg.destination = "content_".concat(webpage);	// it will go to content via events
 	msg.action = "scrape";
 	msg.tab = currentTab;
 
 	chrome.runtime.sendMessage(msg, function(response) {
-	  console.log(response);
-	  //console.log(response.hello.concat(" heard me."));
-	  //console.log(response.data);
-	  //make_popup_free();
+	  console.log(response.received_by.concat(" heard me."));
 	});
-	//chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-	//  chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
-	//	console.log("events received at popup from background with payload:");
-	//    console.log(response.hello);
-	//  });
-	//});
 }
 
 document.getElementById('startProcess').onclick = startProcess;
 
 $(document).ready(function(){
 	$("#waiting").hide();
-	$("button").click(function() { //This will attach the function to all the input elements
-	   console.log($(this).attr('id')); //This will grab the id of the element and alert. Although $(this).id also work, I like this way.
-	});
 	String.prototype.trunc = String.prototype.trunc ||
       function(n){
           return (this.length > n) ? this.substr(0, n-1) + '&hellip;' : this;
@@ -43,11 +35,15 @@ $(document).ready(function(){
 });
 
 function indicate_start(tab_id,tab_url){
-	console.log(tab_id,tab_url);
+	console.log(tab_id,tab_url);		
 	if ((tab_url.search(/canvas.uchicago.edu/) != -1)&&((tab_url.search(/modules/) != -1) || (tab_url.search(/files/)!=-1))){
 		document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+		webpage = "canvas";
 	}
-	else{
+	else if(tab_url.search(/ilykei.com/) != -1){
+		document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+		webpage = "ilykei";
+	}else{
 		document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
 		$("#startProcess").hide();
 		$("#notSupported").show();
@@ -66,35 +62,37 @@ function make_popup_free(){
 	$("#startProcess").hide();
 }
 function request_download(down_id){
+	var dlinks = []
 	for(i=0;i<global_button_links[down_id].length;i++){
-		console.log(global_button_links[down_id][i].link_next.download_link);
+		dlinks.push(global_button_links[down_id][i].link_next.download_link);
+	}
+	for(i=0;i<dlinks.length;i++){
+		actual_link = 'https://canvas.uchicago.edu'.concat(dlinks[i]);
+		chrome.downloads.download({url: actual_link});
 	}
 }
 
-function dummy(){
-	console.log("dummy called");
+function singleLink_download(down_id){
+	actual_link = singleLink[0];
+	chrome.downloads.download({url: actual_link});
+}
 
-	for(i=0;i<3;i++){
-		$('body').append('<div style="margin: auto;width: 50%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">Primary</button></div>');
-	}
-	$("button").click(function() {
-		request_download(this.id); // or alert($(this).attr('id'));
-	});
+function dummy(){
+	chrome.downloads.download({url: "http://unec.edu.az/application/uploads/2014/12/pdf-sample.pdf"});
 }
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-	  if(request.receiver!="background"){
-		//console.log(request)
-		//console.log(request.data[currentTab.id])
+	  if(request.receiver=="popup"){
+		console.log(request);
 		var button_titles = [];
 		var button_links = [];
 		make_popup_free();
 		if(request.data[currentTab.id].type == "batch"){				
 			Object.entries(request.data[currentTab.id].download).forEach(([key, val]) => {
 				if(val.topics.length>0){
-						button_titles.push(key);          // the name of the current key.
-						button_links.push(val.topics);          // the value of the current key.
+						button_titles.push(key);
+						button_links.push(val.topics);
 				}
 			});
 			global_button_links = button_links;
@@ -102,11 +100,20 @@ chrome.runtime.onMessage.addListener(
 				$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
 			}
 			$("button").click(function() {
-				request_download(this.id); // or alert($(this).attr('id'));
+				request_download(this.id);
 			});
 		}else if(request.data[currentTab.id].type == "file"){
-		//
+			button_titles.push(request.data[currentTab.id].download[0].title);
+			button_links.push(request.data[currentTab.id].download[0].link);
+			
+			singleLink = button_links;
+			for(i=0;i<button_titles.length;i++){
+				$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
+			}
+			$("button").click(function() {
+				singleLink_download(this.id);
+			});
+			
 		}
-		//$('body').append('<div>Download link</div>');
 	  }
 });
