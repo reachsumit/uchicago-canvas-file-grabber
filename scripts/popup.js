@@ -41,8 +41,20 @@ function indicate_start(tab_id,tab_url){
 		webpage = "canvas";
 	}
 	else if(tab_url.search(/ilykei.com/) != -1){
-		document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
-		webpage = "ilykei";
+		if(tab_url.search(/lectures/) == -1){
+			if(tab_url.search(/lecture/) != -1){
+				document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+				webpage = "ilykei";
+			}else{
+				document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
+				$("#startProcess").hide();
+				$("#notSupported").show();
+			}
+		}else{
+			document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
+			$("#startProcess").hide();
+			$("#notSupported").show();
+		}
 	}else{
 		document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
 		$("#startProcess").hide();

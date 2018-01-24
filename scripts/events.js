@@ -13,17 +13,11 @@ function(request, sender, sendResponse) {
 					if(request.download[i].link.length>3){
 						if(request.type=="download_side"){
 							actual_link = 'http://ilykei.com'.concat(request.download[i].link);
-							console.log("download side bar item");
-							console.log(request.download[i].name);
-							console.log(actual_link);
-							//chrome.downloads.download({url: actual_link,filename:request.download[i].name});
+							chrome.downloads.download({url: actual_link,filename:request.download[i].name});
 						}
 						else if(request.type=="download_main"){
 							newArr = request.download[i].link.split("%2F");
-							console.log("download main item");
-							console.log(newArr[newArr.length-1]);
-							console.log(request.download[i].link);
-							//chrome.downloads.download({url: request.download[i].link,filename:newArr[newArr.length-1]});
+							chrome.downloads.download({url: request.download[i].link,filename:newArr[newArr.length-1]});
 						}
 					}
 				}
