@@ -1,8 +1,18 @@
 var data = {}
+var data_ilykei_lecture = []
+var data_ilykei_lectures = []
 
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
 	if(request.receiver == "background"){
+		if(request.sender == "content_ilykei"){
+			if(request.type == "save_lecture"){
+				console.log(request);
+				data_ilykei_lecture = request.download;
+			}
+			sendResponse({received_by: "background events"});
+		}
+		
 		if(request.destination.startsWith('content')){
 			console.log("asking content to start scraping/download");
 			chrome.tabs.query({active: true, currentWindow: true}, function(tabs){

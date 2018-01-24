@@ -20,7 +20,7 @@
     "matches": [
 		"*://ilykei.com/*"
     ],
-    "js": ["scripts/content_ilykei.js"]
+    "js": ["scripts/jquery-3.3.1.min.js","scripts/content_ilykei.js"]
   }
 ],
   "permissions": [
