@@ -1,18 +1,45 @@
-var data = {}
-var data_ilykei_lecture = []
-var data_ilykei_lectures = []
+var data = {} // to be sent later to the popup
 
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
 	if(request.receiver == "background"){
+		// if the sender is content_ilykei
 		if(request.sender == "content_ilykei"){
-			if(request.type == "save_lecture"){
+			// if the request is to download sidebar or main body documents
+			if(request.type.startsWith("download_")){
 				console.log(request);
-				data_ilykei_lecture = request.download;
+				console.log(request.download);
+				for(i=0;i<request.download.length;i++){
+					if(request.download[i].link.length>3){
+						if(request.type=="download_side"){
+							actual_link = 'http://ilykei.com'.concat(request.download[i].link);
+							console.log("download side bar item");
+							console.log(request.download[i].name);
+							console.log(actual_link);
+							//chrome.downloads.download({url: actual_link,filename:request.download[i].name});
+						}
+						else if(request.type=="download_main"){
+							newArr = request.download[i].link.split("%2F");
+							console.log("download main item");
+							console.log(newArr[newArr.length-1]);
+							console.log(request.download[i].link);
+							//chrome.downloads.download({url: request.download[i].link,filename:newArr[newArr.length-1]});
+						}
+					}
+				}
+			}
+			// scraping is complete; ask popup to remove the waiting screen now
+			else if(request.type == "scraping_done"){
+				console.log("content has finished scraping");
+				data[sender.tab.id] = {};
+				data[sender.tab.id].tab = sender.tab.id;
+				data[sender.tab.id].type = request.type;
+				chrome.runtime.sendMessage({receiver:request.destination,data:data});
 			}
 			sendResponse({received_by: "background events"});
+			return;
 		}
-		
+		// if the sender is popup and destination is content, e.g. request to start scraping the webpage
 		if(request.destination.startsWith('content')){
 			console.log("asking content to start scraping/download");
 			chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
@@ -20,6 +47,7 @@ function(request, sender, sendResponse) {
 			});
 			sendResponse({received_by: "background events"});
 		}
+		// if the sender is content (canvas; for now) and destination is popup, e.g. send scraped data to popup to generate buttons
 		else if(request.destination == "popup"){
 			console.log("content has finished scraping");
 			data[sender.tab.id] = {};

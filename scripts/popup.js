@@ -83,37 +83,48 @@ function dummy(){
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
+	  // message is from background to popup
 	  if(request.receiver=="popup"){
-		console.log(request);
-		var button_titles = [];
-		var button_links = [];
-		make_popup_free();
-		if(request.data[currentTab.id].type == "batch"){				
-			Object.entries(request.data[currentTab.id].download).forEach(([key, val]) => {
-				if(val.topics.length>0){
-						button_titles.push(key);
-						button_links.push(val.topics);
+			//if(request.sender==""){
+			console.log(request);
+			var button_titles = [];
+			var button_links = [];
+			make_popup_free();
+			if(request.data[currentTab.id].type == "batch"){				
+				Object.entries(request.data[currentTab.id].download).forEach(([key, val]) => {
+					if(val.topics.length>0){
+							button_titles.push(key);
+							button_links.push(val.topics);
+					}
+				});
+				global_button_links = button_links;
+				for(i=0;i<button_titles.length;i++){
+					$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
 				}
-			});
-			global_button_links = button_links;
-			for(i=0;i<button_titles.length;i++){
-				$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
+				$("button").click(function() {
+					request_download(this.id);
+				});
+			}else if(request.data[currentTab.id].type == "file"){
+				button_titles.push(request.data[currentTab.id].download[0].title);
+				button_links.push(request.data[currentTab.id].download[0].link);
+				
+				singleLink = button_links;
+				for(i=0;i<button_titles.length;i++){
+					$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
+				}
+				$("button").click(function() {
+					singleLink_download(this.id);
+				});
+				
+			}else if(request.data[currentTab.id].type == "scraping_done"){
+				// show ilykei instructions here
+				$("#p2Text").text("(Close this popup and use the download links on the website as shown below.)");
+				$(".close").show();
+				$(".close").click(function() {
+					window.close();
+				});
+				$("#ilykei1").show();
+				$("#ilykei2").show();
 			}
-			$("button").click(function() {
-				request_download(this.id);
-			});
-		}else if(request.data[currentTab.id].type == "file"){
-			button_titles.push(request.data[currentTab.id].download[0].title);
-			button_links.push(request.data[currentTab.id].download[0].link);
-			
-			singleLink = button_links;
-			for(i=0;i<button_titles.length;i++){
-				$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
-			}
-			$("button").click(function() {
-				singleLink_download(this.id);
-			});
-			
-		}
-	  }
+	    }
 });
