@@ -106,7 +106,7 @@ chrome.runtime.onMessage.addListener(
 	  // message is from background to popup
 	  if(request.receiver=="popup"){
 			//if(request.sender==""){
-			console.log(request);
+			//console.log(request);
 			var button_titles = [];
 			var button_links = [];
 			make_popup_free();

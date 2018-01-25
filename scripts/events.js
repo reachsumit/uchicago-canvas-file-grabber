@@ -8,7 +8,6 @@ function(request, sender, sendResponse) {
 			// if the request is to download sidebar or main body documents
 			if(request.type.startsWith("download_")){
 				console.log(request);
-				console.log(request.download);
 				for(i=0;i<request.download.length;i++){
 					if(request.download[i].link.length>3){
 						if(request.type=="download_side"){
@@ -59,7 +58,7 @@ function(request, sender, sendResponse) {
 			}
 			sendResponse({received_by: "background events"}); // though no response is required to be sent to content script
 			console.log("sending scraped data to popup");
-			console.log(data);
+			//console.log(data);
 			chrome.runtime.sendMessage({receiver:request.destination,data:data});
 		}
 	}

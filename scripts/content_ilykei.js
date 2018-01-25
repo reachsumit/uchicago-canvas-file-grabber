@@ -38,11 +38,9 @@ function scrapeThePage(){
 		/*TODO: Figure out a way to get lecture content without having to go to the tab*/
 		title = $("tbody a.ng-binding").html();
 		url = $("tbody a.ng-binding").attr("href");
-		console.log(title);
 		full_url = "https://ilykei.com".concat(url);
-		console.log(full_url);
 		$.get(url, function(response) {
-			  console.log(response);
+			  //console.log(response);
 		});
 	}
 	else if (window.location.href.search(/lecture/) != -1){

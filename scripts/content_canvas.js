@@ -80,7 +80,7 @@ function scrapeThePage(){
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-	console.log(request);
+	//console.log(request);
 	if(request.data.destination=="content_canvas"){
 		if(request.action=="scrape"){
 			scrapeThePage();
