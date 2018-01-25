@@ -13,7 +13,7 @@ function(request, sender, sendResponse) {
 					if(request.download[i].link.length>3){
 						if(request.type=="download_side"){
 							actual_link = 'http://ilykei.com'.concat(request.download[i].link);
-							chrome.downloads.download({url: actual_link,filename:request.download[i].name});
+							chrome.downloads.download({url: actual_link,filename:request.folder.concat("/",request.download[i].name)});
 						}
 						else if(request.type=="download_main"){
 							newArr = request.download[i].link.split("%2F");
