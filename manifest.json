@@ -2,12 +2,18 @@
   "manifest_version": 2,
   "name": "UC Grabber",
   "version": "0.1",
+  "short_name": "Make Canvas Great Again!",
+  "description": "Simple tool for UoC students to enable easier downloads from Canvas and ilykei.com portals",
   
   "browser_action": {
     "default_icon": "images/icon.png",
     "default_popup": "html/popup.html",
 	 "default_title": "Grabber for uChicago Canvas!"
   },
+  
+  "icons": { "16": "images/icon16.png",
+           "48": "images/icon48.png",
+          "128": "images/icon128.png" },
   
   "content_scripts": [
   {
@@ -29,5 +35,6 @@
   
   "background": {
     "scripts": ["scripts/events.js"]
-  }
+  },
+  "offline_enabled": true
 }
