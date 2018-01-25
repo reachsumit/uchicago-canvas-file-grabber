@@ -7,8 +7,11 @@ var modules;
 // TODO: Protect against load/reload
 //https://stackoverflow.com/questions/23895377/sending-message-from-a-background-script-to-a-content-script-then-to-a-injected/23895822#23895822
 
+function ask_to_refresh_page(){
+	document.getElementById('pText').innerHTML = "Sorry! Background process is dead. Please try refreshing the page. :(";
+}
+
 function startProcess() {
-	make_popup_busy();
 	console.log("sending request to background")
 	var msg = {};
 	msg.sender = "popup";
@@ -18,7 +21,12 @@ function startProcess() {
 	msg.tab = currentTab;
 
 	chrome.runtime.sendMessage(msg, function(response) {
-	  console.log(response.received_by.concat(" heard me."));
+		if(response.received_by=="none")
+			ask_to_refresh_page();
+		else{
+			make_popup_busy();
+			console.log(response.received_by.concat(" heard me."));
+		}
 	});
 }
 
@@ -38,16 +46,26 @@ $(document).ready(function(){
 	});
 });
 
+function ask_for_status(tab_id){
+	var msg = {};
+	msg.sender = "popup";
+	msg.receiver = "background";
+	msg.destination = "background";
+	msg.action = "check_status";
+	msg.tab = currentTab;
+	chrome.runtime.sendMessage(msg);
+}
+
 function indicate_start(tab_id,tab_url){
-	console.log(tab_id,tab_url);		
+	console.log(tab_id,tab_url);
+	
 	if ((tab_url.search(/canvas.uchicago.edu/) != -1)&&((tab_url.search(/modules/) != -1) || (tab_url.search(/files/)!=-1))){
-		document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+		ask_for_status(tab_id);
 		webpage = "canvas";
 	}
 	else if(tab_url.search(/ilykei.com/) != -1){
 		if(tab_url.search(/lectures/) == -1){
 			if(tab_url.search(/lecture/) != -1){
-				document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
 				webpage = "ilykei";
 			}else{
 				document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
@@ -70,7 +88,7 @@ function make_popup_busy(){
 	$("#startProcess").hide();
 	$("#waiting").show();
 	$("#pText").text("Please wait! This might take upto a minute.");
-	$("#p2Text").text("(Do not close this popup window!)");
+	//$("#p2Text").text("(Do not close this popup window!)");
 }
 
 function make_popup_free(){
@@ -106,46 +124,52 @@ chrome.runtime.onMessage.addListener(
 	  // message is from background to popup
 	  if(request.receiver=="popup"){
 			//if(request.sender==""){
-			//console.log(request);
-			var button_titles = [];
-			var button_links = [];
-			make_popup_free();
-			if(request.data[currentTab.id].type == "batch"){				
-				Object.entries(request.data[currentTab.id].download).forEach(([key, val]) => {
-					if(val.topics.length>0){
-							button_titles.push(key);
-							button_links.push(val.topics);
+			console.log(request);
+			if(request.status=="scraping_done"){
+				$("#startProcess").hide();
+				var button_titles = [];
+				var button_links = [];
+				make_popup_free();
+				if(request.data[currentTab.id].type == "batch"){				
+					Object.entries(request.data[currentTab.id].download).forEach(([key, val]) => {
+						if(val.topics.length>0){
+								button_titles.push(key);
+								button_links.push(val.topics);
+						}
+					});
+					modules = button_titles;
+					global_button_links = button_links;
+					for(i=0;i<button_titles.length;i++){
+						$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
 					}
-				});
-				modules = button_titles;
-				global_button_links = button_links;
-				for(i=0;i<button_titles.length;i++){
-					$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
+					$("button").click(function() {
+						request_download(this.id);
+					});
+				}else if(request.data[currentTab.id].type == "file"){
+					button_titles.push(request.data[currentTab.id].download[0].title);
+					button_links.push(request.data[currentTab.id].download[0].link);
+					
+					singleLink = button_links;
+					for(i=0;i<button_titles.length;i++){
+						$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
+					}
+					$("button").click(function() {
+						singleLink_download(this.id);
+					});
+					
+				}else if(request.data[currentTab.id].type == "scraping_done"){
+					// show ilykei instructions here
+					$("#p2Text").text("(Close this popup and use the download links on the website as shown below.)");
+					$(".close").show();
+					$(".close").click(function() {
+						window.close();
+					});
+					$("#ilykei1").show();
+					$("#ilykei2").show();
 				}
-				$("button").click(function() {
-					request_download(this.id);
-				});
-			}else if(request.data[currentTab.id].type == "file"){
-				button_titles.push(request.data[currentTab.id].download[0].title);
-				button_links.push(request.data[currentTab.id].download[0].link);
-				
-				singleLink = button_links;
-				for(i=0;i<button_titles.length;i++){
-					$('body').append('<div style="margin: auto;width: 70%;"><button type="button" id="'+String(i)+'" class="btn btn-info" style="margin-top:10px;">'+button_titles[i].trunc(22)+'</button></div>');
-				}
-				$("button").click(function() {
-					singleLink_download(this.id);
-				});
-				
-			}else if(request.data[currentTab.id].type == "scraping_done"){
-				// show ilykei instructions here
-				$("#p2Text").text("(Close this popup and use the download links on the website as shown below.)");
-				$(".close").show();
-				$(".close").click(function() {
-					window.close();
-				});
-				$("#ilykei1").show();
-				$("#ilykei2").show();
+			}else if(request.status=="unknown"){
+				document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+				$("#startProcess").show();
 			}
 	    }
 });

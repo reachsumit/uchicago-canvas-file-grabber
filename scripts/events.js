@@ -36,30 +36,53 @@ function(request, sender, sendResponse) {
 			sendResponse({received_by: "background events"});
 			return;
 		}
-		// if the sender is popup and destination is content, e.g. request to start scraping the webpage
-		if(request.destination.startsWith('content')){
-			console.log("asking content to start scraping/download");
-			chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-					chrome.tabs.sendMessage(tabs[0].id, {action: request.action,data:request}, function(response) {});  
-			});
-			sendResponse({received_by: "background events"});
+		if(request.sender == "popup"){
+			// if the sender is popup and destination is content, e.g. request to start scraping the webpage
+			if(request.destination.startsWith('content')){
+				console.log("asking content to start scraping/download");
+				chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+						chrome.tabs.sendMessage(tabs[0].id, {action: request.action,data:request}, function(response) {
+							var lastError = chrome.runtime.lastError;
+							if (lastError) {
+								console.log(lastError.message);
+								sendResponse({received_by: "none"});
+								// 'Could not establish connection. Receiving end does not exist.'
+								return;
+							}
+							sendResponse({received_by: "scraper"});
+						});  
+				});
+			}else{
+				console.log(request.tab)
+				console.log("in")
+				if(String(request.tab.id) in data){
+					console.log("scraping is alrady done. sending results.");
+					chrome.runtime.sendMessage({status:"scraping_done",receiver:"popup",data:data});
+				}
+				else{
+					console.log("scraping needs to be done.");
+					chrome.runtime.sendMessage({status:"unknown",receiver:"popup"});			
+				}
+			}
 		}
 		// if the sender is content (canvas; for now) and destination is popup, e.g. send scraped data to popup to generate buttons
-		else if(request.destination == "popup"){
-			console.log("content has finished scraping");
-			data[sender.tab.id] = {};
-			data[sender.tab.id].tab = sender.tab.id;
-			data[sender.tab.id].type = request.type;
-			data[sender.tab.id].download = [];
-			if(request.type=="file"){
-				data[sender.tab.id].download.push({title:request.title,link:request.link});
-			}else{
-				data[sender.tab.id].download = request.download;
+		else {
+			if(request.destination == "popup"){
+				console.log("content has finished scraping");
+				data[sender.tab.id] = {};
+				data[sender.tab.id].tab = sender.tab.id;
+				data[sender.tab.id].type = request.type;
+				data[sender.tab.id].download = [];
+				if(request.type=="file"){
+					data[sender.tab.id].download.push({title:request.title,link:request.link});
+				}else{
+					data[sender.tab.id].download = request.download;
+				}
+				sendResponse({received_by: "background events"}); // though no response is required to be sent to content script
+				console.log("saving scraped data in background");
+				console.log(data);
+				chrome.runtime.sendMessage({status:"scraping_done",receiver:"popup",data:data});
 			}
-			sendResponse({received_by: "background events"}); // though no response is required to be sent to content script
-			console.log("sending scraped data to popup");
-			//console.log(data);
-			chrome.runtime.sendMessage({receiver:request.destination,data:data});
 		}
 	}
 }

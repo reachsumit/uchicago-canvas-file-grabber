@@ -27,7 +27,7 @@ function scrapeThePage(){
 				module_url = $(this).attr("data-module-url");
 				module_id = $(this).attr("id");
 				//Find module
-				if($("div".concat("#",module_id)).find("div.ig-header div.ig-header-admin div.completion_status i.icon-lock").attr("title")=="Locked"){
+				if($(this).find("div.ig-header div.ig-header-admin div.completion_status i.icon-lock").attr("title")=="Locked"){
 					download[modules_name] = {};
 					download[modules_name].module = modules_name;
 					download[modules_name].module_url = module_url;
@@ -36,10 +36,10 @@ function scrapeThePage(){
 					// For each module take out the file details
 					var link_next;
 					jQuery.ajaxSetup({async:false});
-					$("div".concat("#",module_id)).find("div.content ul.ig-list li").each(function(){
+					$(this).find("div.content ul.ig-list li").each(function(){
 						li_id = $(this).attr("id");
 						if($(this).attr("class").search(/attachment/)!=-1){
-							$("li".concat("#",li_id)).find("div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
+							$(this).find("div.ig-row div.ig-info div.module-item-title span.item_name a").each(function(){
 								$.get($(this).attr("href"), function(response) {
 								  link_next = {download_link:$(response).find("div#content div span a").attr("href"),download_title:$(response).find("div#content div span a").html().trim(),download_filename:$(response).find("h2").text()};
 								});
@@ -63,7 +63,7 @@ function scrapeThePage(){
 					jQuery.ajaxSetup({async:true});
 				}
 		 });
-		 //console.log(download);
+		 console.log(download);
 		
 		var msg = {};
 		msg.sender = "content_canvas";
@@ -83,6 +83,7 @@ chrome.runtime.onMessage.addListener(
 	//console.log(request);
 	if(request.data.destination=="content_canvas"){
 		if(request.action=="scrape"){
+			sendResponse({received_by: "scraper"});
 			scrapeThePage();
 		}
 	}
