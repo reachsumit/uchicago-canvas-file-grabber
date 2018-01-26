@@ -1,4 +1,14 @@
-var data = {} // to be sent later to the popup
+var data = {}; // to be sent later to the popup
+var ongoing = {}; // maintains list of tab for which scarping is ongoing
+ilykei_done = {}; // maintain list of ilykei pages scraped (tab ids)
+
+function send_scraping_start(){
+	chrome.runtime.sendMessage({status:"scraping_start_success",receiver:"popup"});
+}
+
+function send_scraping_fail(){
+	chrome.runtime.sendMessage({status:"scraping_start_fail",receiver:"popup"});
+}
 
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
@@ -31,12 +41,14 @@ function(request, sender, sendResponse) {
 				data[sender.tab.id] = {};
 				data[sender.tab.id].tab = sender.tab.id;
 				data[sender.tab.id].type = request.type;
-				chrome.runtime.sendMessage({receiver:request.destination,data:data});
+				ilykei_done[sender.tab.id] = 1;
+				chrome.runtime.sendMessage({status:request.type,receiver:request.destination,data:data});
 			}
 			sendResponse({received_by: "background events"});
 			return;
 		}
 		if(request.sender == "popup"){
+			fail = false;
 			// if the sender is popup and destination is content, e.g. request to start scraping the webpage
 			if(request.destination.startsWith('content')){
 				console.log("asking content to start scraping/download");
@@ -45,21 +57,23 @@ function(request, sender, sendResponse) {
 							var lastError = chrome.runtime.lastError;
 							if (lastError) {
 								console.log(lastError.message);
-								sendResponse({received_by: "none"});
+								send_scraping_fail();
 								// 'Could not establish connection. Receiving end does not exist.'
 								return;
 							}
-							sendResponse({received_by: "scraper"});
+							ongoing[tabs[0].id] = 1;
+							send_scraping_start();
 						});  
 				});
-			}else{
-				console.log(request.tab)
-				console.log("in")
-				if(String(request.tab.id) in data){
-					console.log("scraping is alrady done. sending results.");
+				sendResponse({received_by: "scraper"});
+			}else{ // popup is asking for scraping status
+				if(String(request.tab.id) in data || ilykei_done[request.tab.id]==1){
+					console.log("scraping is already done. sending results.");
 					chrome.runtime.sendMessage({status:"scraping_done",receiver:"popup",data:data});
-				}
-				else{
+				}else if(ongoing[request.tab.id]==1){
+					console.log("scraping is ongoing.");
+					chrome.runtime.sendMessage({status:"scraping_ongoing",receiver:"popup",data:data});
+				}else{
 					console.log("scraping needs to be done.");
 					chrome.runtime.sendMessage({status:"unknown",receiver:"popup"});			
 				}
@@ -81,6 +95,7 @@ function(request, sender, sendResponse) {
 				sendResponse({received_by: "background events"}); // though no response is required to be sent to content script
 				console.log("saving scraped data in background");
 				console.log(data);
+				ongoing[sender.tab.id] = 0;
 				chrome.runtime.sendMessage({status:"scraping_done",receiver:"popup",data:data});
 			}
 		}

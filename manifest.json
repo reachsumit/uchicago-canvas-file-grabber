@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "UC Grabber",
-  "version": "0.1",
+  "version": "0.2",
   "short_name": "Make Canvas Great Again!",
   "description": "Simple tool for UoC students to enable easier downloads from Canvas and ilykei.com portals",
   
@@ -35,6 +35,5 @@
   
   "background": {
     "scripts": ["scripts/events.js"]
-  },
-  "offline_enabled": true
+  }
 }

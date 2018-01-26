@@ -7,10 +7,6 @@ var modules;
 // TODO: Protect against load/reload
 //https://stackoverflow.com/questions/23895377/sending-message-from-a-background-script-to-a-content-script-then-to-a-injected/23895822#23895822
 
-function ask_to_refresh_page(){
-	document.getElementById('pText').innerHTML = "Sorry! Background process is dead. Please try refreshing the page. :(";
-}
-
 function startProcess() {
 	console.log("sending request to background")
 	var msg = {};
@@ -21,12 +17,7 @@ function startProcess() {
 	msg.tab = currentTab;
 
 	chrome.runtime.sendMessage(msg, function(response) {
-		if(response.received_by=="none")
-			ask_to_refresh_page();
-		else{
-			make_popup_busy();
-			console.log(response.received_by.concat(" heard me."));
-		}
+		console.log(response.received_by.concat(" heard me."));
 	});
 }
 
@@ -66,6 +57,7 @@ function indicate_start(tab_id,tab_url){
 	else if(tab_url.search(/ilykei.com/) != -1){
 		if(tab_url.search(/lectures/) == -1){
 			if(tab_url.search(/lecture/) != -1){
+				ask_for_status(tab_id);
 				webpage = "ilykei";
 			}else{
 				document.getElementById('pText').innerHTML = "Sorry! This webpage is currently not supported :(";
@@ -95,6 +87,10 @@ function make_popup_free(){
 	$("#waiting").hide();
 	$("#pText").text("Your downloads are ready! :)");
 	$("#startProcess").hide();
+	$(".close").show();
+	$(".close").click(function() {
+		window.close();
+	});
 }
 function request_download(down_id){
 	var dlinks = [];
@@ -103,7 +99,7 @@ function request_download(down_id){
 		dlinks.push(global_button_links[down_id][i].link_next.download_link);
 		dnames.push(global_button_links[down_id][i].link_next.download_filename);
 	}
-	folder=modules[down_id].replace(/[^a-z0-9.(),';{}+&^%\[\]$#@!~`+-]/gi, '_');
+	folder=modules[down_id].replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_');
 	for(i=0;i<dlinks.length;i++){
 		actual_link = 'https://canvas.uchicago.edu'.concat(dlinks[i]);
 		chrome.downloads.download({url: actual_link,filename:folder.concat("/",dnames[i])});
@@ -170,6 +166,18 @@ chrome.runtime.onMessage.addListener(
 			}else if(request.status=="unknown"){
 				document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
 				$("#startProcess").show();
+			}
+			else if(request.status=="scraping_start_success" || request.status == "scraping_ongoing"){
+				make_popup_busy();
+			}
+			else if(request.status=="scraping_start_fail"){
+				$("#startProcess").hide();
+				document.getElementById('pText').innerHTML = "Sorry! Chrome background process is dead. :(";
+				$("#p2Text").text("(Please try refreshing this page.)");
+				$(".close").show();
+					$(".close").click(function() {
+						window.close();
+				});
 			}
 	    }
 });

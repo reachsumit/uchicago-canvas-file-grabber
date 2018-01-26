@@ -63,7 +63,7 @@ function scrapeThePage(){
 					jQuery.ajaxSetup({async:true});
 				}
 		 });
-		 console.log(download);
+		 //console.log(download);
 		
 		var msg = {};
 		msg.sender = "content_canvas";

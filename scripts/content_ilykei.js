@@ -55,11 +55,11 @@ function scrapeThePage(){
 		}
 		
 		$("ul.list-group a").each(function(){
-			download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.(),';{}+&^%\[\]$#@!~`+-]/gi, '_')});
+			download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_')});
 		});
 		$("div#lectureDoc").find("a").each(function(){
 			link = $(this).attr("href");
-			title = $(this).text().replace(/[^a-z0-9.(),';{}+&^%\[\]$#@!~`+-]/gi, '_');
+			title = $(this).text().replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_');
 			if(link.search(/fileProxy/) != -1){
 				download_main.push({link:link,name:title});
 			}
@@ -82,6 +82,7 @@ chrome.runtime.onMessage.addListener(
 	if(request.data.destination=="content_ilykei"){
 		console.log(request);
 		if(request.action=="scrape"){
+			sendResponse({received_by: "scraper"});
 			scrapeThePage();
 		}
 	}
