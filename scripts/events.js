@@ -38,6 +38,7 @@ function(request, sender, sendResponse) {
 			// scraping is complete; ask popup to remove the waiting screen now
 			else if(request.type == "scraping_done"){
 				console.log("content has finished scraping");
+				ongoing[sender.tab.id] = 0;
 				data[sender.tab.id] = {};
 				data[sender.tab.id].tab = sender.tab.id;
 				data[sender.tab.id].type = request.type;
@@ -48,7 +49,6 @@ function(request, sender, sendResponse) {
 			return;
 		}
 		if(request.sender == "popup"){
-			fail = false;
 			// if the sender is popup and destination is content, e.g. request to start scraping the webpage
 			if(request.destination.startsWith('content')){
 				console.log("asking content to start scraping/download");
@@ -67,6 +67,25 @@ function(request, sender, sendResponse) {
 				});
 				sendResponse({received_by: "scraper"});
 			}else{ // popup is asking for scraping status
+				if(request.action=="reload"){
+					if(String(request.tab.id) in data)
+						delete data[request.tab.id];
+					if(ilykei_done[request.tab.id]==1)
+						ilykei_done[request.tab.id]=0;
+					if(request.webpage=="ilykei"){
+						request.destination = "content_ilykei";
+						chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+							chrome.tabs.sendMessage(tabs[0].id, {action: "clean",data:request}, function(response) {
+								var lastError = chrome.runtime.lastError;
+								if (lastError) {
+									console.log(lastError.message);
+									return;
+								}
+							});  
+						});
+					}
+					sendResponse({received_by: "background_cleaner"});
+				}
 				if(String(request.tab.id) in data || ilykei_done[request.tab.id]==1){
 					console.log("scraping is already done. sending results.");
 					chrome.runtime.sendMessage({status:"scraping_done",receiver:"popup",data:data});
@@ -100,5 +119,6 @@ function(request, sender, sendResponse) {
 			}
 		}
 	}
+	return true;
 }
 );

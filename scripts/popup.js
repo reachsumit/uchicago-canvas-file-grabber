@@ -141,6 +141,10 @@ chrome.runtime.onMessage.addListener(
 					$("button").click(function() {
 						request_download(this.id);
 					});
+					$('body').append('<div style="margin: auto;width: 15%;"><a href="#" class="reload">Reload</a></div>');
+					$(".reload").click(function() {
+						clean_tab_entry();
+					});
 				}else if(request.data[currentTab.id].type == "file"){
 					button_titles.push(request.data[currentTab.id].download[0].title);
 					button_links.push(request.data[currentTab.id].download[0].link);
@@ -152,6 +156,10 @@ chrome.runtime.onMessage.addListener(
 					$("button").click(function() {
 						singleLink_download(this.id);
 					});
+					$('body').append('<div style="margin: auto;width: 15%;"><a href="#" class="reload">Reload</a></div>');
+					$(".reload").click(function() {
+						clean_tab_entry();
+					});
 					
 				}else if(request.data[currentTab.id].type == "scraping_done"){
 					// show ilykei instructions here
@@ -162,6 +170,10 @@ chrome.runtime.onMessage.addListener(
 					});
 					$("#ilykei1").show();
 					$("#ilykei2").show();
+					$('body').append('<div style="margin: auto;width: 15%;"><a href="#" class="reload">Reload</a></div>');
+					$(".reload").click(function() {
+						clean_tab_entry();
+					});
 				}
 			}else if(request.status=="unknown"){
 				document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
@@ -181,3 +193,21 @@ chrome.runtime.onMessage.addListener(
 			}
 	    }
 });
+
+function clean_tab_entry(){
+	var msg = {};
+	msg.sender = "popup";
+	msg.receiver = "background";
+	msg.destination = "background"
+	msg.action = "reload";
+	msg.webpage = webpage;
+	msg.tab = currentTab;
+
+	chrome.runtime.sendMessage(msg, function(response) {
+		$( "body" ).empty();
+		window.close();
+		//$("#startProcess").show();
+		//document.getElementById('pText').innerHTML = "Hello! Please use the process button to parse this page.";
+		console.log(response.received_by.concat(" heard me."));
+	});
+}

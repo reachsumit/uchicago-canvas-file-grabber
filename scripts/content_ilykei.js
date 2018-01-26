@@ -84,7 +84,17 @@ chrome.runtime.onMessage.addListener(
 		if(request.action=="scrape"){
 			sendResponse({received_by: "scraper"});
 			scrapeThePage();
+		}else if(request.action=="clean"){
+			console.log("cleaning insert flags");
+			sendResponse({received_by: "cleaner_ilykei"});
+			injected = false;
+			$( "#downloadAll" ).parent().remove();
+			$( "#downloadSide" ).parent().remove();
+			download_side = [];
+			download_main = [];
+			directoryName = "";
 		}
 	}
+	return true;
   }
 );
