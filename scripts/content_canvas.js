@@ -1,3 +1,6 @@
+easter_egg = false;
+
+if(easter_egg==true){
 var today = new Date();
 // This section is an easter egg for April Fool's day.
 if(today.getDate()==1&&today.getMonth()==3){
@@ -5,6 +8,7 @@ if(today.getDate()==1&&today.getMonth()==3){
 		$("#DashboardCard_Container").before("<h4 style='display: inline;color:#800000;'><b>Important Notice:</b> MScA course will be a part of Booth School of Business, w.e.f. 01 April 2018.</h4><a href='http://home.uchicago.edu/~sumitk/msca.html' target='_blank'>  Read the Official Announcement Here</a>");
 	}
 } 
+}
 
 function scrapeThePage(){
 	console.log("Scraping canvas!");
