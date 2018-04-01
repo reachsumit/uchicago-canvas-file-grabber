@@ -1,5 +1,6 @@
 console.log("This is ilykei!");
 var injected = false;
+var protect_hidden = true;
 var download_side = [];
 var download_main = [];
 var directoryName = "";
@@ -55,7 +56,15 @@ function scrapeThePage(){
 		}
 		
 		$("ul.list-group a").each(function(){
-			download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_')});
+			if(protect_hidden == true){
+				// this is more of an ethical decision
+				if($(this).parent().attr("class").search(/ng-hide/)==-1){
+					download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_')});
+				}
+			}
+			else{
+				download_side.push({link:$(this).attr("href"),name:$(this).find("div").text().replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_')});
+			}
 		});
 		$("div#lectureDoc").find("a").each(function(){
 			link = $(this).attr("href");
