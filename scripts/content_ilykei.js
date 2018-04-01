@@ -64,7 +64,14 @@ function scrapeThePage(){
 				download_main.push({link:link,name:title});
 			}
 		});
-		directoryName = $("h1.title p").text().replace(/(\r\n|\n|\r)/gm,"_");
+		//directoryName = $("h1.title p").text().replace(/(\r\n|\n|\r)/gm,"_");
+		// Machine learning course on ilykei doesn't have p tag inside h1 for lecture title. Below check handles that case.
+		//if (directoryName == ""){
+		//	directoryName = $("h1.title").text().replace(/(\r\n|\n|\r)/gm,"_");
+		//}
+		
+		// Now I use a different naming method for directories; using breadcrumb seems like a good idea as all the ilykei courses I know have same format for it.
+		directoryName = $("ol.breadcrumb li:nth-child(2) a").text().trim()+"_"+$("ol.breadcrumb li:nth-child(3) a").text().trim();
 		var msg = {};
 		msg.sender = "content_ilykei";
 		msg.receiver = "background"; // we don't want content to directly pick it up as events has to do certain adjustments to this data

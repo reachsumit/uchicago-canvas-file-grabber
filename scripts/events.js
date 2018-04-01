@@ -22,12 +22,12 @@ function(request, sender, sendResponse) {
 					if(request.download[i].link.length>3){
 						if(request.type=="download_side"){
 							actual_link = 'http://ilykei.com'.concat(request.download[i].link);
-							chrome.downloads.download({url: actual_link,filename:request.folder.concat("/",request.download[i].name)});
+							chrome.downloads.download({url: actual_link,filename:request.folder.replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_').concat("/",request.download[i].name)});
 						}
 						else if(request.type=="download_main"){
 							newArr = request.download[i].link.split("%2F");
 							if(request.folder.length>3){
-								chrome.downloads.download({url: request.download[i].link,filename:request.folder.concat("/",newArr[newArr.length-1])});
+								chrome.downloads.download({url: request.download[i].link,filename:request.folder.replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_').concat("/",newArr[newArr.length-1])});
 							}else{
 								chrome.downloads.download({url: request.download[i].link,filename:newArr[newArr.length-1]});
 							}
