@@ -102,7 +102,7 @@ function request_download(down_id){
 	folder=modules[down_id].replace(/[^a-z0-9.(),';{} +&^%\[\]$#@!~`-]/gi, '_');
 	for(i=0;i<dlinks.length;i++){
 		actual_link = 'https://canvas.uchicago.edu'.concat(dlinks[i]);
-		chrome.downloads.download({url: actual_link,filename:folder.concat("/",dnames[i])});
+		chrome.downloads.download({url: actual_link,filename:folder.trim().replace(/ /g,"_").concat("/",dnames[i])});
 	}
 }
 
